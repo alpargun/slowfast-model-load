@@ -32,8 +32,8 @@ import torch
 from torch.fx import symbolic_trace
 
 
-altered_backbone = torch.load("trained-backbone-ep200.pt")
-altered_backbone
+modified_backbone = torch.load("trained-backbone-ep200.pt")
+modified_backbone
 
 
 #%% Modify the head
@@ -58,9 +58,9 @@ from torch import nn
 #original_backbone.head.projection = nn.Identity()
 #original_backbone.head.act = nn.Identity()
 
-altered_backbone.head = nn.Identity()
+modified_backbone.head = nn.Identity()
 
-altered_backbone.head
+modified_backbone.head
 
 
 #%% Save altered model
@@ -68,7 +68,7 @@ import torch
 from torch.fx import symbolic_trace
 
 
-torch.save(altered_backbone, "altered-backbone-ep200.pt")
+torch.save(modified_backbone, "altered-backbone-ep200.pt")
 
 
 
