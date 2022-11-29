@@ -27,13 +27,17 @@ cfg = assert_and_infer_cfg(cfg)
 cfg
 
 
-#%%
+#%% Load the slowfast model based on the config
 import slowfast.utils.checkpoint as cu
 from slowfast.models import build_model
 
 
 model_sf = build_model(cfg)
 model_sf
+
+#%% Save initialized model
+
+torch.save(model_sf, "moco-with-x3d-xs-init.pt")
 
 #%% Config optimizer
 
@@ -69,8 +73,6 @@ checkpoint_epoch
 model_sf.state_dict()
 
 
-
-
 #%% Save model
 import torch
 from torch.fx import symbolic_trace
@@ -89,13 +91,5 @@ model_new
 
 #%% Check state_dict (weights)
 model_new.state_dict()
-
-#%% Modify the last layer
-model_new
-
-
-
-
-
 
 
