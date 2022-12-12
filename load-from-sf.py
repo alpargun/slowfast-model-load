@@ -11,13 +11,17 @@ import sys
 
 #%%
 
-sys.argv = ['--cfg=/home/alpargun/Desktop/good-sf-models/39parts-1gpu-8workers/BDD_MoCo_x3d.yaml',]
+MODEL_NAME = 'finetune_carla-x3d_xs_moco'
+path_to_config = 'trained-models/finetune-carla/finetune_Carla_MoCo_x3d.yaml'
+path_checkpoint = 'trained-models/finetune-carla/ssl_checkpoint_epoch_01000.pyth'
+
+sys.argv = [f'--cfg={path_to_config}',]
 
 print(sys.argv)
 
 args = parse_args()
 
-path_to_config = '/home/alpargun/Desktop/good-sf-models/39parts-1gpu-8workers/BDD_MoCo_x3d.yaml'
+
 
 
 #%%
@@ -37,7 +41,7 @@ model_sf
 
 #%% Save initialized model
 
-torch.save(model_sf, "moco-with-x3d-xs-init.pt")
+# torch.save(model_sf, "x3d_xs-moco-finetune_carla.pt")
 
 #%% Config optimizer
 
@@ -54,10 +58,10 @@ scaler
 
 #%% Load checkpoint
 
-PATH = '/home/alpargun/Desktop/good-sf-models/39parts-1gpu-8workers/checkpoints/ssl_checkpoint_epoch_00200.pyth'
+#PATH = 'trained-models/finetune-carla/ssl_checkpoint_epoch_01000.pyth'
 
 checkpoint_epoch = cu.load_checkpoint(
-                PATH,
+                path_checkpoint,
                 model_sf,
                 cfg.NUM_GPUS > 1,
                 optimizer,
@@ -77,8 +81,8 @@ model_sf.state_dict()
 import torch
 from torch.fx import symbolic_trace
 
-
-torch.save(model_sf, "complete-model-bdd-moco-epoch200.pt")
+path_complete_model = "complete-model-" + MODEL_NAME + "-epoch" + str(checkpoint_epoch) + ".pt"
+torch.save(model_sf, path_complete_model)
 
 
 #%% Restore the saved model
@@ -86,10 +90,12 @@ import torch
 from torch.fx import symbolic_trace
 
 
-model_new = torch.load("complete-model-bdd-moco-epoch200.pt")
+model_new = torch.load(path_complete_model)
 model_new
 
 #%% Check state_dict (weights)
 model_new.state_dict()
 
 
+
+# %%
