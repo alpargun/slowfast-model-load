@@ -1,1 +1,6 @@
 checkpoints/
+output/
+results/
+trained-models/
+*.pt
+*.zip
