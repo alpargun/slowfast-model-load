@@ -92,7 +92,18 @@ torch.save(backbone_r50, path_backbone)
 
 print('finished')
 
-# %%
+#%%
+
+trained_r50 = torch.load("trained-backbone-r50_moco-epoch40.pt",map_location=torch.device('cpu'))
+trained_backbone = trained_r50.eval()
+trained_r50
+
+#%% Change last layer
+
+#trained_r50.head.projection.projection[4] = nn.Linear(in_features=2048, out_features=2048, bias=True)
+trained_r50.head.projection.projection[-1] = nn.Identity()
+trained_r50.head.projection
+
 # %%
 
 # propagate through the backbone
@@ -101,38 +112,52 @@ from torch import nn
 
 input_tensor = torch.zeros(3, 8, 256, 256)
 
-preds = backbone_r50(input_tensor[None, None, ...])
-preds 
+preds = trained_r50(input_tensor[None, None, ...])
+len(preds[0]) 
+
 
 #%%
 
 
-linear1 = nn.Linear(in_features=128, out_features=64, bias=True)
-linear2 = nn.Linear(in_features=64, out_features=32, bias=True)
-linear3_mean = nn.Linear(in_features=32, out_features=1, bias=True)
-linear3_var = nn.Linear(in_features=32, out_features=1, bias=True) 
+lin1 = nn.Linear(in_features=2048, out_features=512, bias=True)
+lin1_relu = nn.ReLU(inplace=True)
 
-flatten = nn.Flatten()
+lin2 = nn.Linear(in_features=512, out_features=128, bias=True)
+lin2_relu = nn.ReLU(inplace=True)
+
+lin3 = nn.Linear(in_features=128, out_features=32, bias=True)
+lin3_relu = nn.ReLU(inplace=True)
+
+lin4_mean = nn.Linear(in_features=32, out_features=1, bias=True)
 tanh = nn.Tanh()
+
+lin4_var = nn.Linear(in_features=32, out_features=1, bias=True) 
 softplus = nn.Softplus()
 
 x = preds
+
 print('shape of x before applying actor and critic: ', x.shape)
-x = linear1(x)
+x = lin1(x)
 print('after lin1: ', x.shape)
 
-#%%
-x = linear2(x)
-print('after lin2: ', x.shape)
+x = lin1_relu(x)
 
-#%%
+x = lin2(x)
+print('after lin2: ', x.shape)
+x = lin2_relu(x)
+
+
+x = lin3(x)
+print('after lin2: ', x.shape)
+x = lin3_relu(x)
+
 print('shape of x before mean and var: ', x.shape)
 
-mean = linear3_mean(x)
+mean = lin4_mean(x)
 mean = tanh(mean)
 print('shape of mean: ', mean)
 
-var = linear3_var(x)
+var = lin4_var(x)
 var = softplus(var)
 print('shape of var: ', var)
 
@@ -142,4 +167,5 @@ x = torch.cat((mean, var), 1)
 
 print("Shape of output in R50 actor:", x.shape)
 x
+
 # %%
